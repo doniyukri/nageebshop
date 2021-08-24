@@ -1,0 +1,14 @@
+main {
+  min-height: 80vh;
+}
+
+/* -------LATEST PRODUCT------ */
+
+.card-title-anchor-adjustment {
+  text-decoration: none;
+  font-size: 95%;
+}
+
+.rating {
+  font-size: 85%;
+}
