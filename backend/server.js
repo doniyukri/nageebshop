@@ -1,20 +1,31 @@
 "use strict";
 
-const express = require("express");
-const products = require("./data/products");
+import express from "express";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+import productRoutes from "./routes/productRoutes.js";
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+
+dotenv.config();
+
+connectDB();
+
 const app = express();
 
 app.get("/", (req, res) => {
   res.send("API is ready");
 });
 
-app.get("/products", (req, res) => {
-  res.json(products);
-});
+app.use("/products", productRoutes);
 
-app.get("/products/:id", (req, res) => {
-  const product = products.find((p) => p._id === req.params.id);
-  res.json(product);
-});
+app.use(notFound);
 
-app.listen(5000, () => console.log("Server is running on port 5000"));
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () =>
+  console.log(
+    `Server is on ${process.env.NODE_ENV} mode and running on port ${PORT}`
+  )
+);
