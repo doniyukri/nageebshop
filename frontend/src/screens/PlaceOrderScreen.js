@@ -11,12 +11,27 @@ const PlaceOrderScreen = ({ history }) => {
 
   const cart = useSelector((state) => state.cart);
 
+  // Calculate price
+  const addDecimals = (num) => {
+    return (Math.round(num * 100) / 100).toFixed(2);
+  };
+
+  cart.itemsPrice = addDecimals(
+    cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
+  );
+  cart.shippingPrice = addDecimals(cart.itemsPrice > 100 ? 0 : 100);
+  cart.taxPrice = addDecimals(0.1 * cart.itemsPrice);
+  cart.totalPrice =
+    Number(cart.itemsPrice) +
+    Number(cart.shippingPrice) +
+    Number(cart.taxPrice);
+
   const orderCreate = useSelector((state) => state.orderCreate);
   const { order, success, error } = orderCreate;
 
   useEffect(() => {
     if (success) {
-      history.pushState(`/order/${order._id}`);
+      history.push(`/order/${order._id}`);
     }
     // eslint-disable-next-line
   }, [history, success]);
@@ -34,21 +49,6 @@ const PlaceOrderScreen = ({ history }) => {
       })
     );
   };
-
-  // Calculate price
-  const addDecimals = (num) => {
-    return (Math.round(num * 100) / 100).toFixed(2);
-  };
-
-  cart.itemsPrice = addDecimals(
-    cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
-  );
-  cart.shippingPrice = addDecimals(cart.itemsPrice > 100 ? 0 : 100);
-  cart.taxPrice = addDecimals(0.1 * cart.itemsPrice);
-  cart.totalPrice =
-    Number(cart.itemsPrice) +
-    Number(cart.shippingPrice) +
-    Number(cart.taxPrice);
 
   return (
     <>
@@ -69,7 +69,7 @@ const PlaceOrderScreen = ({ history }) => {
             <ListGroup.Item>
               <h2>Payment Method</h2>
               <strong>Method : </strong>
-              {cart.paymentMethod.paymentMethod}
+              {cart.paymentMethod}
             </ListGroup.Item>
             <ListGroup.Item>
               <h2>Order Items</h2>
