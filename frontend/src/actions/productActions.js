@@ -143,7 +143,7 @@ export const updateProduct = (product) => async (dispatch, getState) => {
 
     const { data } = await axios.put(
       `/products/${product._id}`,
-      { product },
+      product,
       config
     );
 
@@ -151,13 +151,18 @@ export const updateProduct = (product) => async (dispatch, getState) => {
       type: PRODUCT_UPDATE_SUCCESS,
       payload: data,
     });
-  } catch (err) {
+    dispatch({ type: PRODUCT_DETAILS_SUCCESS, payload: data });
+  } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    // if (message === 'Not authorized, token failed') {
+    //   dispatch(logout())
+    // }
     dispatch({
       type: PRODUCT_UPDATE_FAIL,
-      payload:
-        err.response && err.response.data.message
-          ? err.response.data.message
-          : err.message,
+      payload: message,
     });
   }
 };
