@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -74,7 +75,9 @@ const ProductScreen = ({ history, match }) => {
         <Message variant="danger">{err}</Message>
       ) : (
         <>
-          {/* <Meta title={product.name} /> */}
+          <Helmet>
+            <title>{product.name} | NageebShop</title>
+          </Helmet>
           <Row>
             <Col md={6}>
               <Image src={product.image} alt={product.name} fluid />
