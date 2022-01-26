@@ -36,7 +36,7 @@ const OrderScreen = ({ match, history }) => {
   const { userInfo } = userLogin;
 
   if (!loading) {
-    // Calculate price
+    //   Calculate prices
     const addDecimals = (num) => {
       return (Math.round(num * 100) / 100).toFixed(2);
     };
@@ -52,7 +52,7 @@ const OrderScreen = ({ match, history }) => {
     }
 
     const addPayPalScript = async () => {
-      const { data: clientId } = await axios.get("/config/paypal");
+      const { data: clientId } = await axios.get("/api/config/paypal");
       const script = document.createElement("script");
       script.type = "text/javascript";
       script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
@@ -63,7 +63,7 @@ const OrderScreen = ({ match, history }) => {
       document.body.appendChild(script);
     };
 
-    if (!order || successPay || successDeliver) {
+    if (!order || successPay || successDeliver || order._id !== orderId) {
       dispatch({ type: ORDER_PAY_RESET });
       dispatch({ type: ORDER_DELIVER_RESET });
       dispatch(getOrderDetails(orderId));
@@ -74,9 +74,10 @@ const OrderScreen = ({ match, history }) => {
         setSdkReady(true);
       }
     }
-  }, [dispatch, history, orderId, order, successPay, successDeliver, userInfo]);
+  }, [dispatch, orderId, successPay, successDeliver, order, userInfo, history]);
 
   const successPaymentHandler = (paymentResult) => {
+    console.log(paymentResult);
     dispatch(payOrder(orderId, paymentResult));
   };
 
@@ -90,9 +91,10 @@ const OrderScreen = ({ match, history }) => {
     <Message variant="danger">{error}</Message>
   ) : (
     <>
-      <h1>
-        Order <span>{order._id}</span>
-      </h1>
+      <Link className="btn btn-light my-3" to="/profile">
+        Go Back
+      </Link>
+      <h1>Order {order._id}</h1>
       <Row>
         <Col md={8}>
           <ListGroup variant="flush">
@@ -106,7 +108,7 @@ const OrderScreen = ({ match, history }) => {
                 <a href={`mailto:${order.user.email}`}>{order.user.email}</a>
               </p>
               <p>
-                <strong>Address : </strong>
+                <strong>Address:</strong>
                 {order.shippingAddress.address}, {order.shippingAddress.city}{" "}
                 {order.shippingAddress.postalCode},{" "}
                 {order.shippingAddress.country}
@@ -116,26 +118,27 @@ const OrderScreen = ({ match, history }) => {
                   Delivered on {order.deliveredAt}
                 </Message>
               ) : (
-                <Message variant="danger">Not delivered</Message>
+                <Message variant="danger">Not Delivered</Message>
               )}
             </ListGroup.Item>
 
             <ListGroup.Item>
               <h2>Payment Method</h2>
               <p>
-                <strong>Method : </strong>
+                <strong>Method: </strong>
                 {order.paymentMethod}
               </p>
               {order.isPaid ? (
                 <Message variant="success">Paid on {order.paidAt}</Message>
               ) : (
-                <Message variant="danger">Not paid</Message>
+                <Message variant="danger">Not Paid</Message>
               )}
             </ListGroup.Item>
+
             <ListGroup.Item>
               <h2>Order Items</h2>
               {order.orderItems.length === 0 ? (
-                <Message>Your order is empty</Message>
+                <Message>Order is empty</Message>
               ) : (
                 <ListGroup variant="flush">
                   {order.orderItems.map((item, index) => (
@@ -150,16 +153,12 @@ const OrderScreen = ({ match, history }) => {
                           />
                         </Col>
                         <Col>
-                          <Link
-                            to={`/product/${item.product}`}
-                            className="card-title-anchor-adjustment"
-                          >
+                          <Link to={`/product/${item.product}`}>
                             {item.name}
                           </Link>
                         </Col>
                         <Col md={4}>
-                          {item.qty} x ${item.price} = $
-                          {(item.qty * item.price).toFixed(2)}
+                          {item.qty} x ${item.price} = ${item.qty * item.price}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -193,7 +192,7 @@ const OrderScreen = ({ match, history }) => {
                   <Col>${order.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
-              <ListGroup.Item variant="success">
+              <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
                   <Col>${order.totalPrice}</Col>
@@ -220,7 +219,7 @@ const OrderScreen = ({ match, history }) => {
                   <ListGroup.Item>
                     <Button
                       type="button"
-                      className="btn w-100"
+                      className="btn btn-block"
                       onClick={deliverHandler}
                     >
                       Mark As Delivered

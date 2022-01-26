@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Row,
@@ -28,27 +28,28 @@ const ProductScreen = ({ history, match }) => {
   const dispatch = useDispatch();
 
   const productDetails = useSelector((state) => state.productDetails);
-  const { loading, err, product } = productDetails;
+  const { loading, error, product } = productDetails;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   const productReviewCreate = useSelector((state) => state.productReviewCreate);
   const {
-    loading: loadingProductReview,
     success: successProductReview,
-    err: errProductReview,
+    loading: loadingProductReview,
+    error: errorProductReview,
   } = productReviewCreate;
 
   useEffect(() => {
     if (successProductReview) {
-      alert("Review submitted");
       setRating(0);
       setComment("");
+    }
+    if (!product._id || product._id !== match.params.id) {
+      dispatch(listProductDetails(match.params.id));
       dispatch({ type: PRODUCT_CREATE_REVIEW_RESET });
     }
-    dispatch(listProductDetails(match.params.id));
-  }, [dispatch, match, successProductReview]);
+  }, [dispatch, match, successProductReview, product._id]);
 
   const addToCartHandler = () => {
     history.push(`/cart/${match.params.id}?qty=${qty}`);
@@ -71,12 +72,12 @@ const ProductScreen = ({ history, match }) => {
       </Link>
       {loading ? (
         <Loader />
-      ) : err ? (
-        <Message variant="danger">{err}</Message>
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
       ) : (
         <>
           <Helmet>
-            <title>{product.name} | NageebShop</title>
+            <title>{`${product.name} | NageebShop`}</title>
           </Helmet>
           <Row>
             <Col md={6}>
@@ -178,8 +179,8 @@ const ProductScreen = ({ history, match }) => {
                     </Message>
                   )}
                   {loadingProductReview && <Loader />}
-                  {errProductReview && (
-                    <Message variant="danger">{errProductReview}</Message>
+                  {errorProductReview && (
+                    <Message variant="danger">{errorProductReview}</Message>
                   )}
                   {userInfo ? (
                     <Form onSubmit={submitHandler}>
